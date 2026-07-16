@@ -15,6 +15,21 @@
       rel="stylesheet"
     />
 
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-QBCFGYNX7Y"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-QBCFGYNX7Y");
+    </script>
+
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -23,6 +38,11 @@
     <div id="app">
       <div class="loader" id="loader">
         <div class="loader-text">PINNACLE</div>
+        <div class="loader-sub">A Golden Journey</div>
+        <div class="loader-progress">
+          <div class="loader-progress-bar" aria-hidden="true"></div>
+          <div class="loader-progress-text" id="loaderProgressText">0%</div>
+        </div>
       </div>
 
       <div class="noise"></div>
