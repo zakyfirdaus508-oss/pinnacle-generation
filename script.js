@@ -130,9 +130,7 @@ if (heroButtons) {
    SCROLL REVEAL
 ========================================= */
 
-const sections = document.querySelectorAll(
-  ".about, .card, .stats div, .cta",
-);
+const sections = document.querySelectorAll(".about, .card, .stats div, .cta");
 
 sections.forEach((section) => {
   gsap.from(section, {
@@ -279,282 +277,138 @@ if (heroVisual) {
 
 const canvas = document.querySelector("#bg");
 
-const scene = new THREE.Scene();
+let scene = null;
+let camera = null;
+let renderer = null;
+let particles = null;
+let blob = null;
 
-const camera = new THREE.PerspectiveCamera(
-  45,
+if (canvas && typeof THREE !== "undefined") {
+  scene = new THREE.Scene();
 
-  window.innerWidth / window.innerHeight,
+  camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100,
+  );
+  camera.position.z = 6;
 
-  0.1,
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha: true,
+    antialias: true,
+  });
 
-  100,
-);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-camera.position.z = 6;
+  // particles
+  const particleGeometry = new THREE.BufferGeometry();
+  const particleAmount = 1500;
+  const particlePosition = new Float32Array(particleAmount * 3);
 
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
+  for (let i = 0; i < particleAmount * 3; i++) {
+    particlePosition[i] = (Math.random() - 0.5) * 18;
+  }
 
-  alpha: true,
+  particleGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(particlePosition, 3),
+  );
 
-  antialias: true,
-});
+  const particleMaterial = new THREE.PointsMaterial({
+    size: 0.018,
+    color: "#ffffff",
+    transparent: true,
+    opacity: 0.7,
+  });
 
-renderer.setSize(
-  window.innerWidth,
+  particles = new THREE.Points(particleGeometry, particleMaterial);
+  scene.add(particles);
 
-  window.innerHeight,
-);
+  // blob
+  const blobGeometry = new THREE.IcosahedronGeometry(1.4, 64);
+  const blobMaterial = new THREE.MeshStandardMaterial({
+    color: "#D4A63A",
+    roughness: 0.2,
+    metalness: 0.7,
+    transparent: true,
+    opacity: 0.85,
+  });
 
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  blob = new THREE.Mesh(blobGeometry, blobMaterial);
+  blob.position.set(2, 0, 0);
+  scene.add(blob);
 
-/* =========================================
-   FLOATING PARTICLES
-========================================= */
+  // lighting
+  const light1 = new THREE.PointLight("#5b8cff", 5, 10);
+  light1.position.set(3, 3, 5);
+  scene.add(light1);
 
-const particleGeometry = new THREE.BufferGeometry();
+  const light2 = new THREE.PointLight("#750808", 4, 10);
+  light2.position.set(-3, -2, 3);
+  scene.add(light2);
 
-const particleAmount = 1500;
+  // mouse
+  const mouse = { x: 0, y: 0 };
 
-const particlePosition = new Float32Array(particleAmount * 3);
-
-for (let i = 0; i < particleAmount * 3; i++) {
-  particlePosition[i] = (Math.random() - 0.5) * 18;
-}
-
-particleGeometry.setAttribute(
-  "position",
-
-  new THREE.BufferAttribute(
-    particlePosition,
-
-    3,
-  ),
-);
-
-const particleMaterial = new THREE.PointsMaterial({
-  size: 0.018,
-
-  color: "#ffffff",
-
-  transparent: true,
-
-  opacity: 0.7,
-});
-
-const particles = new THREE.Points(
-  particleGeometry,
-
-  particleMaterial,
-);
-
-scene.add(particles);
-
-/* =========================================
-   LIQUID 3D BLOB
-========================================= */
-
-const blobGeometry = new THREE.IcosahedronGeometry(
-  1.4,
-
-  64,
-);
-
-const blobMaterial = new THREE.MeshStandardMaterial({
-  color: "#D4A63A",
-
-  roughness: 0.2,
-
-  metalness: 0.7,
-
-  transparent: true,
-
-  opacity: 0.85,
-});
-
-const blob = new THREE.Mesh(
-  blobGeometry,
-
-  blobMaterial,
-);
-
-blob.position.set(
-  2,
-
-  0,
-
-  0,
-);
-
-scene.add(blob);
-
-/* =========================================
-   LIGHTING
-========================================= */
-
-const light1 = new THREE.PointLight(
-  "#5b8cff",
-
-  5,
-
-  10,
-);
-
-light1.position.set(
-  3,
-
-  3,
-
-  5,
-);
-
-scene.add(light1);
-
-const light2 = new THREE.PointLight(
-  "#750808",
-
-  4,
-
-  10,
-);
-
-light2.position.set(
-  -3,
-
-  -2,
-
-  3,
-);
-
-scene.add(light2);
-
-/* =========================================
-   MOUSE INTERACTION
-========================================= */
-
-let mouse = {
-  x: 0,
-
-  y: 0,
-};
-
-window.addEventListener(
-  "mousemove",
-
-  (e) => {
+  window.addEventListener("mousemove", (e) => {
     mouse.x = e.clientX / window.innerWidth - 0.5;
-
     mouse.y = e.clientY / window.innerHeight - 0.5;
-  },
-);
+  });
 
-/* =========================================
-   ANIMATION LOOP
-========================================= */
+  const clock = new THREE.Clock();
 
-const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const time = clock.getElapsedTime();
 
-function animate() {
-  requestAnimationFrame(animate);
+    if (!particles || !blob) return;
 
-  const time = clock.getElapsedTime();
+    particles.rotation.y += 0.0008;
+    particles.rotation.x = Math.sin(time * 0.2) * 0.001;
 
-  /* particles */
+    blob.rotation.x = time * 0.2;
+    blob.rotation.y = time * 0.3;
 
-  particles.rotation.y += 0.0008;
+    const scale = 1 + Math.sin(time * 2) * 0.08;
+    blob.scale.set(scale, scale, scale);
 
-  particles.rotation.x = Math.sin(time * 0.2) * 0.001;
+    blob.position.x += (mouse.x * 2 - blob.position.x) * 0.02;
+    blob.position.y += (-mouse.y * 2 - blob.position.y) * 0.02;
 
-  /* blob organic movement */
+    camera.position.x += (mouse.x * 0.5 - camera.position.x) * 0.02;
+    camera.position.y += (-mouse.y * 0.5 - camera.position.y) * 0.02;
 
-  blob.rotation.x = time * 0.2;
+    camera.lookAt(scene.position);
+    renderer.render(scene, camera);
+  }
 
-  blob.rotation.y = time * 0.3;
+  function updateThreeSize() {
+    if (!camera || !renderer) return;
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
 
-  const scale = 1 + Math.sin(time * 2) * 0.08;
+  window.addEventListener("resize", updateThreeSize);
 
-  blob.scale.set(
-    scale,
-
-    scale,
-
-    scale,
-  );
-
-  /* mouse movement */
-
-  blob.position.x += (mouse.x * 2 - blob.position.x) * 0.02;
-
-  blob.position.y += (-mouse.y * 2 - blob.position.y) * 0.02;
-
-  camera.position.x += (mouse.x * 0.5 - camera.position.x) * 0.02;
-
-  camera.position.y += (-mouse.y * 0.5 - camera.position.y) * 0.02;
-
-  camera.lookAt(scene.position);
-
-  renderer.render(
-    scene,
-
-    camera,
-  );
+  animate();
 }
 
-animate();
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-
-window.addEventListener(
-  "resize",
-
-  () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(
-      window.innerWidth,
-
-      window.innerHeight,
-    );
-  },
-);
-animate();
-
-/* =========================================
-   RESIZE
-========================================= */
-
-window.addEventListener(
-  "resize",
-
-  () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(
-      window.innerWidth,
-
-      window.innerHeight,
-    );
-  },
-);
 /* =========================================
    LOADING ANIMATION
 ========================================= */
 
 window.addEventListener("load", function () {
   const loader = document.getElementById("loader");
+  if (!loader) return;
 
   setTimeout(function () {
     loader.classList.add("hide");
   }, 1000);
 });
-
 /* =========================================
    TEXT REVEAL
 ========================================= */
@@ -594,7 +448,7 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     });
   });
 });
-document.getElementById("loader").style.display = "none";
+// document.getElementById("loader").style.display = "none"; // avoid fighting CSS #loader.hide
 /* =========================================
    MEMORY CARD 3D TILT
 ========================================= */
@@ -701,25 +555,30 @@ magnetic.forEach((item) => {
 });
 const slides = document.querySelector(".slides");
 const slide = document.querySelectorAll(".slide");
+const nextBtn = document.querySelector(".next");
+const prevBtn = document.querySelector(".prev");
 
 let index = 0;
 
-document.querySelector(".next").onclick = () => {
+function updateSlides() {
+  if (!slides || slide.length === 0) return;
+  slides.style.transform = `translateX(-${index * 100}%)`;
+}
+
+if (nextBtn && prevBtn) {
+  nextBtn.onclick = () => {
     index++;
+    if (index >= slide.length) index = 0;
+    updateSlides();
+  };
 
-    if(index >= slide.length){
-        index = 0;
-    }
-
-    slides.style.transform = `translateX(-${index * 100}%)`;
-};
-
-document.querySelector(".prev").onclick = () => {
+  prevBtn.onclick = () => {
     index--;
+    if (index < 0) index = slide.length - 1;
+    updateSlides();
+  };
+}
 
-    if(index < 0){
-        index = slide.length - 1;
-    }
-
-    slides.style.transform = `translateX(-${index * 100}%)`;
-};
+if (slides && slide.length > 0) {
+  updateSlides();
+}
