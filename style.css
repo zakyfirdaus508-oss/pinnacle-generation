@@ -555,15 +555,15 @@ nav a:hover {
 ========================================= */
 
 .maskot {
-  padding: 70px 8%;
+  padding: 40px 8%;
   display: flex;
   justify-content: space-between;
 }
 
 .maskot-text {
-  text-align: start;
+  text-align: end;
 
-  justify-content: start;
+  align-items: end;
 
   max-width: 600px;
 
@@ -571,8 +571,9 @@ nav a:hover {
 }
 
 .maskot-image {
-  width: 400px;
-  position: absolute;
+  overflow: hidden;
+  width: 900px;
+  position: relative;
   right: 10px;
   mask-image: linear-gradient(to top, transparent 10%, black 150%, black 50%);
 }
@@ -594,7 +595,6 @@ nav a:hover {
 
   line-height: 1.7;
 }
-
 /* =========================================
    CTA SECTION
 ========================================= */
@@ -683,16 +683,30 @@ footer h2 {
   letter-spacing: -2px;
 }
 
-footer p {
+a {
   color: #888;
+  text-decoration: none;
 
-  margin-top: 15px;
+  font-size: 15px;
+
+  transition: 0.3s;
+}
+
+a:hover {
+  color: var(--gold);
+  border-radius: 30px;
+  font-weight: 200;
+  transition: all 0.2s ease;
 }
 
 footer div:last-child {
   display: flex;
 
   gap: 35px;
+}
+
+p {
+  color: #888;
 }
 
 /* =========================================
@@ -1046,13 +1060,27 @@ body {
   .hero {
     min-height: 100vh;
 
-    display: block;
+    display: flex;
+
+    flex-direction: column;
 
     padding: 180px 25px 80px;
   }
 
   .hero h1 {
     letter-spacing: -3px;
+  }
+
+  .subtitle {
+    color: var(--champagne);
+
+    font-size: 13px;
+
+    letter-spacing: 2px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 30px;
   }
 
   .desc {
@@ -1216,10 +1244,13 @@ body {
   }
 
   .hero-image {
-    position: absolute;
-    top: -90px;
-    right: 90px;
-    width: 230px;
+    top: 30px;
+    right: 70px;
+    max-width: 260px;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     animation: logoFloat 6s ease-in-out infinite;
   }
 
